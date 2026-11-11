@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MarketPlace</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- HOME -->
+    <div id="page-home" class="page active">
+      <header class="header">
+        <div class="header-top">
+          <span class="time" id="current-time">10:43</span>
+          <div class="status-icons">
+            <span>VPN</span>
+            <span>📶</span>
+            <span>🔋</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="products-grid" id="products-grid">
+        <!-- products injected by JS -->
+      </main>
+    </div>
+
+    <!-- PRODUCT DETAIL -->
+    <div id="page-detail" class="page">
+      <header class="header detail-header">
+        <button class="back-btn" onclick="showPage('home')">←</button>
+        <div class="product-brand" id="detail-brand">
+          <img id="detail-brand-icon" src="" alt="" />
+          <div>
+            <div id="detail-brand-name"></div>
+            <div id="detail-brand-sub" class="sub"></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="detail-content">
+        <div class="detail-image-wrap">
+          <img id="detail-image" src="" alt="" />
+        </div>
+        <div class="detail-title" id="detail-title"></div>
+        <div class="detail-tags" id="detail-tags"></div>
+        <div class="detail-price-row">
+          <span class="price" id="detail-price"></span>
+          <span class="old-price" id="detail-old-price"></span>
+          <span class="discount" id="detail-discount"></span>
+        </div>
+        <div class="detail-desc" id="detail-desc"></div>
+      </div>
+
+      <div class="buy-bar">
+        <button class="buy-btn" onclick="goToPayment()">Купить</button>
+      </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div id="page-payment" class="page">
+      <header class="header payment-header">
+        <button class="back-btn" onclick="showPage('detail')">←</button>
+        <h1>Оплата товара</h1>
+      </header>
+
+      <div class="payment-content">
+        <div class="you-pay">Вы платите:</div>
+        <div class="pay-amount" id="pay-amount">$0.00</div>
+        <div class="pay-approx" id="pay-approx">≈ 0 ₽</div>
+
+        <div class="wallet-card">
+          <div class="wallet-label">Адрес получателя (TRC20):</div>
+          <div class="wallet-address" id="wallet-address">
+            TH82AANMK3x4r6tLX186WRqWmwisxWAxha
+          </div>
+          <button class="copy-btn" onclick="copyAddress()">Скопировать</button>
+
+          <div class="amount-row">
+            <span>Сумма к оплате:</span>
+            <strong id="pay-usdt">0 USDT</strong>
+          </div>
+
+          <div class="network-row">
+            <div class="tether">
+              <span class="t-icon">₮</span>
+              <div>
+                <div>Tether</div>
+                <div class="net">TRC-20</div>
+              </div>
+            </div>
+            <span>›</span>
+          </div>
+        </div>
+
+        <button class="confirm-btn" onclick="confirmPayment()">ПОДТВЕРДИТЬ ОПЛАТУ</button>
+        <p class="pay-hint">После перевода нажмите кнопку. Товар будет выдан автоматически после проверки.</p>
+      </div>
+    </div>
+
+    <!-- SELL (только для владельца) -->
+    <div id="page-sell" class="page">
+      <header class="header">
+        <h1>Выложить товар</h1>
+      </header>
+      <div class="sell-form" id="sell-form">
+        <input type="text" id="sell-title" placeholder="Название товара" />
+        <input type="text" id="sell-brand" placeholder="Бренд / Категория" />
+        <input type="text" id="sell-image" placeholder="URL картинки" />
+        <input type="number" id="sell-price" placeholder="Цена $" step="0.01" />
+        <input type="number" id="sell-old-price" placeholder="Старая цена $ (опционально)" step="0.01" />
+        <textarea id="sell-desc" placeholder="Описание"></textarea>
+        <input type="text" id="sell-tags" placeholder="Теги через | (например: ❤️ ОГРОМНЫЙ ПАК)" />
+        <button class="buy-btn" onclick="addProduct()">Опубликовать</button>
+      </div>
+      <div id="sell-locked" class="locked-msg" style="display:none;">
+        <p>Только владелец может выкладывать товары.</p>
+        <p>Перейдите в Профиль → Настройки → Код</p>
+      </div>
+    </div>
+
+    <!-- PROFILE / SETTINGS -->
+    <div id="page-profile" class="page">
+      <header class="header">
+        <h1>Профиль</h1>
+      </header>
+      <div class="profile-content">
+        <div class="profile-card">
+          <div class="avatar">👤</div>
+          <div id="profile-status">Обычный пользователь</div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Настройки</h3>
+          <div class="setting-item" onclick="toggleCodeInput()">
+            <span>🔑 Код владельца</span>
+            <span>›</span>
+          </div>
+          <div id="code-box" class="code-box" style="display:none;">
+            <input type="password" id="owner-code" placeholder="Введите код" />
+            <button onclick="activateOwner()">Активировать</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Мои действия</h3>
+          <div class="setting-item" onclick="clearAll()">
+            <span>🗑 Очистить все товары (владелец)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH (заглушка) -->
+    <div id="page-search" class="page">
+      <header class="header">
+        <h1>Поиск</h1>
+      </header>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Найти товар..." oninput="filterProducts()" />
+      </div>
+      <main class="products-grid" id="search-results"></main>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-page="home" onclick="showPage('home')">
+        <span>🔍</span>
+        <span>Поиск</span>
+      </button>
+      <button class="nav-item" data-page="home" onclick="showPage('home')">
+        <span>🏆</span>
+        <span>Призы</span>
+      </button>
+      <button class="nav-item center" data-page="sell" onclick="showPage('sell')">
+        <span class="plus">+</span>
+      </button>
+      <button class="nav-item" data-page="home" onclick="alert('Чаты скоро')">
+        <span>💬</span>
+        <span>Чаты</span>
+      </button>
+      <button class="nav-item" data-page="profile" onclick="showPage('profile')">
+        <span>👤</span>
+        <span>Профиль</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
