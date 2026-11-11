@@ -12,89 +12,21 @@ let currentProduct = null;
 let products = [];
 let isOwner = localStorage.getItem('isOwner') === 'true';
 
-const DEFAULT_PRODUCTS = [
-  {
-    id: 1,
-    title: 'Бабочка ледяной арбитр, керамибит',
-    brand: 'Скины',
-    brandIcon: 'https://cdn-icons-png.flaticon.com/512/5969/5969264.png',
-    image: 'https://picsum.photos/seed/knife1/400/300',
-    price: 0.90,
-    oldPrice: 1.50,
-    discount: '-40%',
-    tags: '❄️ Ледяной | Керамибит',
-    desc: 'Редкий скин ножа. Мгновенная выдача.'
-  },
-  {
-    id: 2,
-    title: 'ВСЕ НЕЙРОСЕТИ | Версии Без',
-    brand: 'AI Tools',
-    brandIcon: 'https://cdn-icons-png.flaticon.com/512/4712/4712109.png',
-    image: 'https://picsum.photos/seed/ai2/400/300',
-    price: 1.39,
-    oldPrice: 4.99,
-    discount: '-72%',
-    tags: '🌍 Все нейросети | 🚀 Версии Без',
-    desc: 'Доступ ко всем популярным нейросетям без ограничений.'
-  },
-  {
-    id: 3,
-    title: 'ОГРОМНЫЙ ПАК МОНТАЖЁРА',
-    brand: 'CapCut',
-    brandIcon: 'https://cdn-icons-png.flaticon.com/512/5968/5968705.png',
-    image: 'https://picsum.photos/seed/capcut3/400/300',
-    price: 0.90,
-    oldPrice: 1.50,
-    discount: '-40%',
-    tags: '❤️ ОГРОМНЫЙ ПАК МОНТАЖЁРА 🔥 | 2026 | ♻️ АВТОВЫДАЧА',
-    desc: 'Большой пак эффектов, пресетов и шаблонов для CapCut. Автовыдача после оплаты.'
-  },
-  {
-    id: 4,
-    title: '5000 TRY | Код пополнения',
-    brand: 'PlayStation',
-    brandIcon: 'https://cdn-icons-png.flaticon.com/512/588/588395.png',
-    image: 'https://picsum.photos/seed/ps4/400/300',
-    price: 113.99,
-    oldPrice: 189.99,
-    discount: '-40%',
-    tags: '🌸 5000 TRY | Код пополнения 🌸',
-    desc: 'Карта пополнения PlayStation Store на 5000 турецких лир.'
-  },
-  {
-    id: 5,
-    title: 'Chill Flame за 269.999,99₽',
-    brand: 'Telegram',
-    brandIcon: 'https://cdn-icons-png.flaticon.com/512/2111/2111646.png',
-    image: 'https://picsum.photos/seed/gift5/400/300',
-    price: 19.49,
-    oldPrice: 24.99,
-    discount: '-22%',
-    tags: '✨ Chill Flame ✨',
-    desc: 'Редкий NFT-подарок Telegram. Автовыдача.'
-  },
-  {
-    id: 6,
-    title: '1200 ГЕМОВ CLASH ROYALE',
-    brand: 'Clash Royale',
-    brandIcon: 'https://cdn-icons-png.flaticon.com/512/5969/5969264.png',
-    image: 'https://picsum.photos/seed/clash6/400/300',
-    price: 10.49,
-    oldPrice: 14.49,
-    discount: '-28%',
-    tags: '✅ 1200 ГЕМОВ CLASH ROYALE на твой аккаунт',
-    desc: 'Гемы Clash Royale. Быстрая выдача на ваш аккаунт.'
-  }
-];
+const DEFAULT_PRODUCTS = [];
 
 // ========== Init ==========
 function init() {
-  const saved = localStorage.getItem('products');
-  if (saved) {
-    products = JSON.parse(saved);
+  // Версия каталога — при смене сбрасываем старые демо-товары
+  const CATALOG_VERSION = '2';
+  const savedVersion = localStorage.getItem('catalogVersion');
+
+  if (savedVersion !== CATALOG_VERSION) {
+    products = [];
+    localStorage.setItem('products', '[]');
+    localStorage.setItem('catalogVersion', CATALOG_VERSION);
   } else {
-    products = [...DEFAULT_PRODUCTS];
-    saveProducts();
+    const saved = localStorage.getItem('products');
+    products = saved ? JSON.parse(saved) : [];
   }
 
   updateOwnerUI();
@@ -154,7 +86,12 @@ function renderProducts(list = products) {
   if (!grid) return;
 
   if (list.length === 0) {
-    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#9ca3af;padding:40px 0;">Товаров пока нет</p>';
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#9ca3af;">
+        <div style="font-size:48px;margin-bottom:12px;">🛒</div>
+        <div style="font-size:16px;margin-bottom:6px;">Пока нет товаров</div>
+        <div style="font-size:13px;">Владелец ещё не добавил ничего</div>
+      </div>`;
     return;
   }
 
